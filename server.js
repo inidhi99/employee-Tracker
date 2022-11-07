@@ -110,7 +110,6 @@ function addEmployee() {
     )
     // adding to the database ???
     .then((answers) => {});
-
 }
 
 // need id (empoloyee table), title(roles table),  name (department table), salaray (roles table)
@@ -193,20 +192,6 @@ function addRole() {
     .then((answers) => {});
 }
 
-//   ]).then(function (answers) {
-//     const selectedDepartment = res.find(department => department.name === answers.departmentName);
-//     db.query("INSERT INTO roles SET ?",
-//       {
-//         title: answers.title,
-//         salary: answers.salary,
-//         department_id: selectedDepartment.id
-//       }, function (err, res) {
-//         if (err) throw err;
-//         console.log("Added new role " + answers.title + " " + answers.salary + "\n");
-//         initPrompt();
-//       })
-//   })
-// })
 
 // need department id (roles table) and name (department table)
 function viewDepartments() {
@@ -219,15 +204,67 @@ function viewDepartments() {
 }
 
 function addDepartment() {
-  inquirer.prompt({
-    // what is the name of the department?
-    name: "title",
-    type: "input",
-    message: "what is the name of the department?",
-  })
-  // added department to the database   ??
-  .then;
+  inquirer
+    .prompt({
+      // what is the name of the department?
+      name: "newDepartment",
+      type: "input",
+      message: "what is the name of the department?",
+    })
+
+// added department to the database  ??
+default.findAllDepartments(){
+  .then(answers) => {
+    let name = answers.addDepartment
+  }
 }
+  }
+
+
+
+
+    // added department to the database  ??
+    db.findAllDepartments()
+    .then((answers) => {
+      let name = answers.newDepartment, rows;
+      console.log('Your department has been added!');
+      console.table(newDepartment);
+      prompt();
+    })
+    
+// }
+
+
+
+// update employee managers  - BONUS 
+function updateManager (){
+
+};
+
+// view employees by manager - BONUS 
+function viewEmployeesManager (){
+
+};
+
+// view employees by department - BONUS 
+function viewEmployeeByDepartment(){
+
+};
+
+// delete departments, roles, and employees - BONUS 
+function deleteDepartment (){
+
+};
+
+// view the total utilized budget of a department—in other words, the combined salaries of all employees in that department (8 points) - BONUS 
+function budget (){
+
+};
+
+
+
+
+
 
 //calling the prompt function (aka the questions)
 prompt();
