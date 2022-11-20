@@ -1,5 +1,6 @@
 // require('dotenv').config();
 const inquirer = require("inquirer");
+const { findAllRoles } = require("./db");
 // entire DB folder
 const db = require("./db");
 //console.table - render sql in the console
@@ -17,10 +18,14 @@ function prompt() {
         "View All Employees",
         "Add an Employee",
         "Update an Employee Role",
+        "View Employee's Manager",
         "View All Roles",
         "Add a Role",
         "View All Departments",
+        "View All employee's Department",
         "Add a Department",
+        "Remove a Department",
+        "View Budget",
         "Quit",
       ],
     })
@@ -39,6 +44,14 @@ function prompt() {
           updateRole();
           break;
 
+        case "View Employee's Manager":
+          viewEmployeesManager();
+          break;
+        
+        case "View All employee's Department":
+          viewEmployeeByDepartment();
+          break;
+
         case "View All Roles":
           viewRoles();
           break;
@@ -53,6 +66,18 @@ function prompt() {
 
         case "Add a Department":
           addDepartment();
+          break;
+
+        case "Remove a Department":
+          deleteDepartment();
+          break;
+
+        case "View Budget":
+          budget();
+          break;
+
+        case "Quit":
+          quit();
           break;
       }
     });
@@ -71,7 +96,7 @@ function viewEmployees() {
 
 function addEmployee() {
   inquirer
-    .prompt(
+    .prompt([
       // what is the employee's first name?
       {
         type: "input",
@@ -84,32 +109,59 @@ function addEmployee() {
         name: "last_name",
         message: "what is the employee's last name?",
       },
-      // what is the employee's role ?
-      // options: Sales Lead, Salesperson, Lead Engineer, Software Engineer, Account Manager, Accountant, Legal Team Lead, Lawyer
-      {
-        type: "list",
-        name: "employee_role",
-        message: "what is the employee's role?",
-        choices: [
-          "Sales Lead",
-          "Salesperson",
-          "Lead Engineer",
-          "Software Engineer",
-          "Account Manager",
-          "Accountant",
-          "Legal Team Lead",
-          "Lawyer",
-        ],
-      },
-      // who is the employee's manager?
-      {
-        type: "input",
-        name: "empolyee_manager",
-        message: "who is the employee's manager?",
-      }
-    )
-    // adding to the database ???
-    .then((answers) => {});
+    ])
+    .then((res) => {
+      let firstName = res.first_name;
+      let lastName = res.last_name;
+      db.findAllRoles().then(([rows]) => {
+        let roles = rows;
+        const roleOption = roles.map(({ id, title }) => ({
+          name: title,
+          value: id,
+        }));
+        inquirer
+          .prompt({
+            type: "list",
+            name: "role_id",
+            message: "what is the employee's role?",
+            choices: roleOption,
+          })
+          .then((res) => {
+            let roleId = res.role_id;
+            db.findAllEmployees().then(([rows]) => {
+              let employees = rows;
+              const managersChoices = employees.map(
+                ({ id, first_name, last_name }) => ({
+                  name: `${first_name} ${last_name}`,
+                  value: id,
+                })
+              );
+              // emoloyee have no assiocation with manager_Id if you pick none
+              managersChoices.unshift({ name: "None", value: null });
+              inquirer
+                .prompt({
+                  type: "list",
+                  name: "manager_id",
+                  message: "who is the employee's manager?",
+                  choices: managersChoices,
+                })
+                .then((res) => {
+                  let empoloyee = {
+                    manager_id: res.manager_id,
+                    role_id: roleId,
+                    first_name: firstName,
+                    last_name: lastName,
+                  };
+                  db.addNewEmployee(empoloyee);
+                })
+                .then(() =>
+                  console.log(`added ${firstName} ${lastName} to the database`)
+                )
+                .then(() => prompt());
+            });
+          });
+      });
+    });
 }
 
 // need id (empoloyee table), title(roles table),  name (department table), salaray (roles table)
@@ -121,6 +173,120 @@ function viewRoles() {
     })
     .then(() => prompt());
 }
+
+function addRole() {
+  db.findAllDepartments().then(([rows]) => {
+    let department = rows;
+    const departmentChoices = department.map(({ id, name }) => ({
+      name: name,
+      value: id,
+    }));
+    inquirer
+      .prompt([
+        // what is the salary of the role ?
+        {
+          name: "title",
+          // type: "input",
+          message: "what is the name of the role?",
+        },
+        // what is the salary of the role ?
+        {
+          name: "salary",
+          // type: "input",
+          message: "what is the salary of the role ?",
+        },
+
+        // which department does the role belong to ? (options: Sales, Engineering, Finance, Legal) ???
+        {
+          type: "list",
+          name: "department_id",
+          message: "which department does this role belong to?",
+          choices: departmentChoices,
+        }]
+      )
+      // adding role to the database ??
+      .then( res => {
+        let role = {
+          title: res.title,
+          salary: res.salary, 
+          department_id: res.department_id,
+        }
+        db.addNewRole(role)
+          .then(() => console.log(`added ${role.title} to the database`))
+          .then(() => prompt());
+      });
+  });
+}
+
+// need department id (roles table) and name (department table)
+function viewDepartments() {
+  db.findAllDepartments()
+    .then(([rows]) => {
+      let departments = rows;
+      console.table(departments);
+    })
+    .then(() => prompt());
+}
+
+function addDepartment() {
+  inquirer
+    .prompt({
+      // what is the name of the department?
+      name: "name",
+      type: "input",
+      message: "what is the name of the department?",
+    })
+    .then((answers) => {
+      db.addNewDepartment(answers)
+        .then(() => console.log("New Department added!"))
+        .then(() => prompt());
+    });
+}
+
+// view employees by department 
+function viewEmployeeByDepartment() {
+  db.findAllEmployeesDepartment()
+  .then(([rows]) => {
+    let employees = rows;
+    console.table(employees);
+  })
+  .then(() => prompt());
+}
+
+
+function quit(){ 
+  console.log("Thank you, Goodbye")
+  process.exit();
+}
+
+
+
+
+// have to work from here 
+
+
+
+
+// update employee managers  - BONUS
+function updateManager() {}
+
+// view employees by manager - BONUS
+function viewEmployeesManager() {
+  
+}
+
+
+
+// view the total utilized budget of a department—in other words, the combined salaries of all employees in that department (8 points) - BONUS
+function budget() {
+  db.ViewBudgett()
+    .then(([rows]) => {
+      let departments = rows;
+      console.table(departments);
+    })
+    .then(() => prompt());
+}
+
 
 function updateRole() {
   inquirer
@@ -165,101 +331,6 @@ function updateRole() {
     .then((answers) => {});
 }
 
-function addRole() {
-  inquirer
-    .prompt(
-      // what is the salary of the role ?
-      {
-        name: "title",
-        type: "input",
-        message: "what is the name of the role?",
-      },
-      // what is the salary of the role ?
-      {
-        name: "salary",
-        type: "input",
-        message: "what is the salary of the role ?",
-      },
-      // which department does the role belong to ? (options: Sales, Engineering, Finance, Legal) ???
-      {
-        name: "department_name",
-        type: "list",
-        choices: res.map((department) => department.name),
-        message: "Select department ID",
-      }
-    )
-    // adding role to the database ??
-    .then((answers) => {});
-}
-
-
-// need department id (roles table) and name (department table)
-function viewDepartments() {
-  db.findAllDepartments()
-    .then(([rows]) => {
-      let departments = rows;
-      console.table(departments);
-    })
-    .then(() => prompt());
-}
-
-function addDepartment() {
-  inquirer
-    .prompt({
-      // what is the name of the department?
-      name: "newDepartment",
-      type: "input",
-      message: "what is the name of the department?",
-    })
-
-// added department to the database  ??
-default.findAllDepartments(){
-  .then(answers) => {
-    let name = answers.addDepartment
-  }
-}
-  }
-
-
-
-
-    // added department to the database  ??
-    db.findAllDepartments()
-    .then((answers) => {
-      let name = answers.newDepartment, rows;
-      console.log('Your department has been added!');
-      console.table(newDepartment);
-      prompt();
-    })
-    
-// }
-
-
-
-// update employee managers  - BONUS 
-function updateManager (){
-
-};
-
-// view employees by manager - BONUS 
-function viewEmployeesManager (){
-
-};
-
-// view employees by department - BONUS 
-function viewEmployeeByDepartment(){
-
-};
-
-// delete departments, roles, and employees - BONUS 
-function deleteDepartment (){
-
-};
-
-// view the total utilized budget of a department—in other words, the combined salaries of all employees in that department (8 points) - BONUS 
-function budget (){
-
-};
 
 
 
