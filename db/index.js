@@ -54,40 +54,31 @@ class DB {
       "SELECT employee.first_name, employee.last_name, department.name as department FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id;");
   }
 
+  // query to view employee's manager 
+  findAllEmployeesManager() {
+    return this.connection
+    .promise()
+    .query("SELECT employee.first_name, employee.last_name, concat(manager.first_name, ' ', manager.last_name) as manager FROM employee lEFT JOIN employee manager ON manager.id = employee.manager_id;");
+  }
 
 
 
 
 
 
+  
   // have to work from here 
-
-
-  // findAllEmployees() {
-  //   return this.connection
-  //     .promise()
-  //     .query(
-  //       " SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as department, role.salary, concat(manager.first_name, ' ', manager.last_name) as manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id lEFT JOIN employee manager ON manager.id = employee.manager_id;"
-  //     );
-  // }
-
-
 
 // query to remove a departments
   removeDepartment(removeDep) {
     //inserting into department using the newDepartment (answers)
     return this.connection
       .promise()
-      .query("DELETE FROM department WHERE department.name = (?);", removeDep);
+      .query("DELETE FROM department WHERE name = ?", removeDep);
   }
 
 
-  // query to view employee's manager 
-  findAllEmployeesManager() {
-    return this.connection
-    .promise()
-    .query("");
-  }
+
 
 
     ViewBudgett() {

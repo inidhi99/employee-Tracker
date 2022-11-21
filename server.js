@@ -47,7 +47,7 @@ function prompt() {
         case "View Employee's Manager":
           viewEmployeesManager();
           break;
-        
+
         case "View All employee's Department":
           viewEmployeeByDepartment();
           break;
@@ -202,15 +202,15 @@ function addRole() {
           name: "department_id",
           message: "which department does this role belong to?",
           choices: departmentChoices,
-        }]
-      )
-      // adding role to the database ??
-      .then( res => {
+        },
+      ])
+      // adding role to the database 
+      .then((res) => {
         let role = {
           title: res.title,
-          salary: res.salary, 
+          salary: res.salary,
           department_id: res.department_id,
-        }
+        };
         db.addNewRole(role)
           .then(() => console.log(`added ${role.title} to the database`))
           .then(() => prompt());
@@ -243,37 +243,112 @@ function addDepartment() {
     });
 }
 
-// view employees by department 
+// view employees by department
 function viewEmployeeByDepartment() {
   db.findAllEmployeesDepartment()
-  .then(([rows]) => {
-    let employees = rows;
-    console.table(employees);
-  })
-  .then(() => prompt());
+    .then(([rows]) => {
+      let employees = rows;
+      console.table(employees);
+    })
+    .then(() => prompt());
 }
 
-
-function quit(){ 
-  console.log("Thank you, Goodbye")
+function quit() {
+  console.log("Thank you, Goodbye");
   process.exit();
 }
 
+// view employees by manager 
+function viewEmployeesManager() {
+  db.findAllEmployeesManager()
+    .then(([rows]) => {
+      let employees = rows;
+      console.table(employees);
+    })
+    .then(() => prompt());
+
+}
 
 
 
-// have to work from here 
+
+
+// have to work from here
+
+// delete departments, roles, and employees - BONUS
+function deleteDepartment() {
+  db.findAllDepartments().then(([rows]) => {
+    let department = rows;
+    const departmentChoices = department.map(({ id, name }) => ({
+      name: name,
+      value: id,
+    }));
+    inquirer
+      .prompt(
+        // which department does the role belong to ? 
+        {
+          type: "list",
+          name: "department_name",
+          message: "which department would you like to remove?",
+          choices: departmentChoices,
+        }
+      )
+      // removing it from the database
+      .then((res) => {
+        let department = {
+          name: res.name
+        };
+      db.removeDepartment(department)
+      .then(() => console.log(`removed ${department.name} to the database`))
+      .then(() => prompt());
+      });
+    });
+
+
+
+
+    // .then((res) => {
+    //   let empoloyee = {
+    //     manager_id: res.manager_id,
+    //     role_id: roleId,
+    //     first_name: firstName,
+    //     last_name: lastName,
+    //   };
+    //   db.addNewEmployee(empoloyee);
+    // })
+    // .then(() =>
+    //   console.log(`added ${firstName} ${lastName} to the database`)
+    // )
+    // .then(() => prompt());
+
+
+
+
+  // .then((answers) => {
+  //   db.removeDepartment(answers)
+  //     .then(() => console.log("Removed from the Department!"))
+  //     .then(() => prompt());
+  // });
+
+//   .then((res) => {
+//     let department = {
+//       name: res.name
+//     };
+//    db.removeDepartment(department)
+//    .then(() => console.log(`added ${department.name} to the database`))
+//    .then(() => prompt());
+//   });
+// });
+
+
+}
+
 
 
 
 
 // update employee managers  - BONUS
 function updateManager() {}
-
-// view employees by manager - BONUS
-function viewEmployeesManager() {
-  
-}
 
 
 
@@ -286,7 +361,6 @@ function budget() {
     })
     .then(() => prompt());
 }
-
 
 function updateRole() {
   inquirer
@@ -330,12 +404,6 @@ function updateRole() {
     // adding to the database ???
     .then((answers) => {});
 }
-
-
-
-
-
-
 
 //calling the prompt function (aka the questions)
 prompt();
