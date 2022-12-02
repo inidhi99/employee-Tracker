@@ -17,15 +17,17 @@ function prompt() {
       choices: [
         "View All Employees",
         "Add an Employee",
-        "Update an Employee Role",
-        "View Employee's Manager",
+        "View employee by Department",
+        "View employee by Manager",
         "View All Roles",
         "Add a Role",
+        "Update an Employee's Role",
+        "Update an Employee's Manager",
         "View All Departments",
-        "View All employee's Department",
         "Add a Department",
         "Remove a Department",
-        "View Budget",
+        "View Budget by Department",
+        "View Total Budget",
         "Quit",
       ],
     })
@@ -40,16 +42,12 @@ function prompt() {
           addEmployee();
           break;
 
-        case "Update an Employee Role":
-          updateRole();
-          break;
-
-        case "View Employee's Manager":
-          viewEmployeesManager();
-          break;
-
-        case "View All employee's Department":
+        case "View employee by Department":
           viewEmployeeByDepartment();
+          break;
+
+        case "View employee by Manager":
+          viewEmployeeByManager();
           break;
 
         case "View All Roles":
@@ -58,6 +56,14 @@ function prompt() {
 
         case "Add a Role":
           addRole();
+          break;
+
+        case "Update an Employee's Role":
+          updateRole();
+          break;
+
+        case "Update an Employee's Manager":
+          updateEmployeeManager();
           break;
 
         case "View All Departments":
@@ -69,11 +75,15 @@ function prompt() {
           break;
 
         case "Remove a Department":
-          deleteDepartment();
+          removeDepartment();
           break;
 
-        case "View Budget":
-          budget();
+        case "View budget by Department":
+          DepartmentBudget();
+          break;
+
+        case "View Total Budget":
+          totalBudget();
           break;
 
         case "Quit":
@@ -83,7 +93,6 @@ function prompt() {
     });
 }
 
-// need id, first and last name  (empoloyee table),title (roles table), name (department table), salaray (roles table) and manager (empolyee table)
 function viewEmployees() {
   // calling and creating a table (each row is one employee)
   db.findAllEmployees()
@@ -119,6 +128,7 @@ function addEmployee() {
           name: title,
           value: id,
         }));
+        //Gets the list of the role 
         inquirer
           .prompt({
             type: "list",
@@ -164,6 +174,24 @@ function addEmployee() {
     });
 }
 
+function viewEmployeeByDepartment() {
+  db.viewEmployeeByDepartment()
+  .then(([department])=> {
+    // let department = rows;
+    console.table(department);
+  })
+  .then(() => prompt());
+}
+
+function viewEmployeeByManager() {
+  db.viewEmployeeByManager()
+  .then(([manager])=> {
+    // let department = rows;
+    console.table(manager);
+  })
+  .then(() => prompt());
+}
+
 // need id (empoloyee table), title(roles table),  name (department table), salaray (roles table)
 function viewRoles() {
   db.findAllRoles()
@@ -204,7 +232,7 @@ function addRole() {
           choices: departmentChoices,
         },
       ])
-      // adding role to the database 
+      // adding role to the database
       .then((res) => {
         let role = {
           title: res.title,
@@ -217,6 +245,14 @@ function addRole() {
       });
   });
 }
+
+function updateRole() {}
+
+function updateEmployeeManager() {}
+
+
+
+
 
 // need department id (roles table) and name (department table)
 function viewDepartments() {
@@ -243,40 +279,7 @@ function addDepartment() {
     });
 }
 
-// view employees by department
-function viewEmployeeByDepartment() {
-  db.findAllEmployeesDepartment()
-    .then(([rows]) => {
-      let employees = rows;
-      console.table(employees);
-    })
-    .then(() => prompt());
-}
-
-function quit() {
-  console.log("Thank you, Goodbye");
-  process.exit();
-}
-
-// view employees by manager 
-function viewEmployeesManager() {
-  db.findAllEmployeesManager()
-    .then(([rows]) => {
-      let employees = rows;
-      console.table(employees);
-    })
-    .then(() => prompt());
-
-}
-
-
-
-
-
-// have to work from here
-
-// delete departments, roles, and employees - BONUS
-function deleteDepartment() {
+function removeDepartment() {
   db.findAllDepartments().then(([rows]) => {
     let department = rows;
     const departmentChoices = department.map(({ id, name }) => ({
@@ -284,126 +287,61 @@ function deleteDepartment() {
       value: id,
     }));
     inquirer
-      .prompt(
-        // which department does the role belong to ? 
+      .prompt([
+        // which department does the role belong to ? (options: Sales, Engineering, Finance, Legal) ???
         {
           type: "list",
-          name: "department_name",
-          message: "which department would you like to remove?",
+          name: "department_id",
+          message: "which department would you lile to remove?",
           choices: departmentChoices,
-        }
-      )
-      // removing it from the database
-      .then((res) => {
-        let department = {
-          name: res.name
-        };
-      db.removeDepartment(department)
-      .then(() => console.log(`removed ${department.name} to the database`))
-      .then(() => prompt());
+        },
+      ])
+      // adding role to the database
+      .then((res) =>{
+        db.removeDepartment(res.department_id)
+          .then(() => console.log(`removed department`))
+          .then(() => prompt());
       });
-    });
+  });
+}
 
+function DepartmentBudget() {}
 
+function totalBudget() {}
 
-
-    // .then((res) => {
-    //   let empoloyee = {
-    //     manager_id: res.manager_id,
-    //     role_id: roleId,
-    //     first_name: firstName,
-    //     last_name: lastName,
-    //   };
-    //   db.addNewEmployee(empoloyee);
-    // })
-    // .then(() =>
-    //   console.log(`added ${firstName} ${lastName} to the database`)
-    // )
-    // .then(() => prompt());
-
-
-
-
-  // .then((answers) => {
-  //   db.removeDepartment(answers)
-  //     .then(() => console.log("Removed from the Department!"))
-  //     .then(() => prompt());
-  // });
-
-//   .then((res) => {
-//     let department = {
-//       name: res.name
-//     };
-//    db.removeDepartment(department)
-//    .then(() => console.log(`added ${department.name} to the database`))
-//    .then(() => prompt());
-//   });
-// });
-
-
+function quit() {
+  console.log("Thank you, Goodbye");
+  process.exit();
 }
 
 
 
 
 
-// update employee managers  - BONUS
-function updateManager() {}
 
 
 
-// view the total utilized budget of a department—in other words, the combined salaries of all employees in that department (8 points) - BONUS
-function budget() {
-  db.ViewBudgett()
-    .then(([rows]) => {
-      let departments = rows;
-      console.table(departments);
-    })
-    .then(() => prompt());
-}
 
-function updateRole() {
-  inquirer
-    .prompt(
-      // which employee's role do you want to update ?
-      // options: John Doe, Mike Chan, Ashley Rodriguez, Kevin Tupik, Kunal Singh, Malia Brown, Sarah Lourd, Tom Allen
-      {
-        type: "list",
-        name: "employee_role",
-        message: "which employee's role do you want to update ?",
-        choices: [
-          "John Doe",
-          "Mike Chan",
-          "Ashley Rodriguez",
-          " Kevin Tupik",
-          "Kunal Singh",
-          "Malia Brown",
-          "Sarah Lourd",
-          "Tom Allen",
-        ],
-      },
-      // which role do you want to assign the selected empolyee?
-      // options: Sales Lead, Salesperson, Lead Engineer, Software Engineer, Account Manager, Accountant, Legal Team Lead, Lawyer
-      {
-        type: "list",
-        name: "role",
-        message: "which role do you want to assign the selected empolyee?",
-        choices: [
-          "Sales Lead",
-          "Salesperson",
-          "Lead Engineer",
-          "Software Engineer",
-          "Account Manager",
-          "Accountant",
-          "Legal Team Lead",
-          "Lawyer",
-        ],
-      }
-    )
 
-    // adding to the database ???
-    .then((answers) => {});
-}
+
+// have to work from here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //calling the prompt function (aka the questions)
 prompt();
