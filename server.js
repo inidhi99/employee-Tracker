@@ -337,7 +337,10 @@ function viewEmployeeByDepartment() {
 
 
 
+function updateRole() {
 
+
+}
 
 
 

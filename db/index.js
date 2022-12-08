@@ -76,14 +76,6 @@ removeDepartment(id){
 
   // have to work from here 
 
-  findAllEmployees() {
-    return this.connection
-      .promise()
-      .query(
-        " SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as department, role.salary, concat(manager.first_name, ' ', manager.last_name) as manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id lEFT JOIN employee manager ON manager.id = employee.manager_id;"
-      );
-  }
-
 
 //  query to Update an Employee's Role
 updateEmployeeRole(updateEmployee) {
@@ -94,20 +86,19 @@ updateEmployeeRole(updateEmployee) {
 
 
 
-//  // query to View employee by Department
-//  findEmployeeByDepartment (viewEmployee){
-//   return this.connection.promise().query(" SELECT  employee.first_name, employee.last_name, role.title FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department department ON role.department_id = department.id WHERE department_id = 1;", viewEmployee );
+ // query to View employee by Department
+ findEmployeeByDepartment (viewEmployee){
+  return this.connection.promise().query(" SELECT  employee.first_name, employee.last_name, role.title FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department department ON role.department_id = department.id WHERE department_id = 1;", viewEmployee );
   
-
+}
   // query to View employee by Manager
 // viewEmployeeByManager(){
 //   return this.connection.promise().query(" SELECT employee.first_name, employee.last_name, concat(manager.first_name, ' ', manager.last_name) as manager FROM employee lEFT JOIN employee manager ON manager.id = employee.manager_id WHERE manager.id = 1;")
 // }
 
 
+
 }
-
-
 
 
 module.exports = new DB(connection);
