@@ -174,24 +174,6 @@ function addEmployee() {
     });
 }
 
-function viewEmployeeByDepartment() {
-  db.viewEmployeeByDepartment()
-  .then(([department])=> {
-    // let department = rows;
-    console.table(department);
-  })
-  .then(() => prompt());
-}
-
-function viewEmployeeByManager() {
-  db.viewEmployeeByManager()
-  .then(([manager])=> {
-    // let department = rows;
-    console.table(manager);
-  })
-  .then(() => prompt());
-}
-
 // need id (empoloyee table), title(roles table),  name (department table), salaray (roles table)
 function viewRoles() {
   db.findAllRoles()
@@ -246,7 +228,10 @@ function addRole() {
   });
 }
 
-function updateRole() {}
+function updateRole() {
+
+
+}
 
 function updateEmployeeManager() {}
 
@@ -292,7 +277,7 @@ function removeDepartment() {
         {
           type: "list",
           name: "department_id",
-          message: "which department would you lile to remove?",
+          message: "which department would you like to remove?",
           choices: departmentChoices,
         },
       ])
@@ -321,18 +306,34 @@ function quit() {
 
 
 
-
-
-
 // have to work from here
 
 
 
-
-
-
-
-
+function viewEmployeeByDepartment() {
+  db.findAllDepartments().then(([rows]) => {
+    let department = rows;
+    const departmentChoices = department.map(({ id, name }) => ({
+      name: name,
+      value: id,
+    }));
+    inquirer
+      .prompt([
+        // which department does the role belong to ? (options: Sales, Engineering, Finance, Legal) ???
+        {
+          type: "list",
+          name: "department_id",
+          message: "which department would you like to see?",
+          choices: departmentChoices,
+        },
+      ])
+      .then ((answers) => {
+        db.findEmployeeByDepartment(answers)
+        .then(([departments]) =>  console.table(departments))
+        .then(() => prompt());
+      })
+  });
+}
 
 
 

@@ -21,17 +21,6 @@ class DB {
       .query("INSERT INTO employee SET ?", newEmployee);
   }
 
-
- // query to View employee by Department
-viewEmployeeByDepartment (){
-  return this.connection.promise().query(" SELECT  employee.first_name, employee.last_name, role.title, department.name as department FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department department ON role.department_id = department.id WHERE department.id = ?;")
-  
-}
-  // query to View employee by Manager
-viewEmployeeByManager(){
-  return this.connection.promise().query(" SELECT employee.first_name, employee.last_name, concat(manager.first_name, ' ', manager.last_name) as manager FROM employee lEFT JOIN employee manager ON manager.id = employee.manager_id WHERE manager.id = 1;")
-}
-
   // query to view all roles
   findAllRoles() {
     return this.connection
@@ -65,9 +54,7 @@ viewEmployeeByManager(){
       .promise()
       .query("INSERT INTO department SET ?;", newDepartment);
   }
-
-
-
+  
 // query to Remove a Department
 removeDepartment(id){
   return this.connection.promise().query("DELETE FROM department WHERE id = ?; ", id);
@@ -78,8 +65,10 @@ removeDepartment(id){
 
 
 
-// query to View Total Budget"
-// use sum operator 
+// query to View Total Budget" -  use sum operator 
+
+
+
 
 
 
@@ -87,16 +76,38 @@ removeDepartment(id){
 
   // have to work from here 
 
+  findAllEmployees() {
+    return this.connection
+      .promise()
+      .query(
+        " SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as department, role.salary, concat(manager.first_name, ' ', manager.last_name) as manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id lEFT JOIN employee manager ON manager.id = employee.manager_id;"
+      );
+  }
+
+
+//  query to Update an Employee's Role
+updateEmployeeRole(updateEmployee) {
+  return this.connection.promise().query(
+    "SELECT employee.id, employee.first_name, employee.last_name, role.id FROM employee, role, department WHERE department.id = role.department_id AND role.id = employee.role_id INSERT INTO employee SET ?", updateEmployee);
+}
 
 
 
 
-
-
-
+//  // query to View employee by Department
+//  findEmployeeByDepartment (viewEmployee){
+//   return this.connection.promise().query(" SELECT  employee.first_name, employee.last_name, role.title FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department department ON role.department_id = department.id WHERE department_id = 1;", viewEmployee );
   
+
+  // query to View employee by Manager
+// viewEmployeeByManager(){
+//   return this.connection.promise().query(" SELECT employee.first_name, employee.last_name, concat(manager.first_name, ' ', manager.last_name) as manager FROM employee lEFT JOIN employee manager ON manager.id = employee.manager_id WHERE manager.id = 1;")
+// }
 
 
 }
+
+
+
 
 module.exports = new DB(connection);
